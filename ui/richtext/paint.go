@@ -23,9 +23,11 @@ func (v *view) paint(p *ui.Painter, r ui.Rect) {
 	}
 	v.layout(w, h)
 	// Text scrolled partly out of the box is cut at its edges, not painted
-	// over what is around it: Element.Clip hides only what children draw,
-	// and the editor paints on itself.
-	p.Clip(r, 0, func() { v.paintText(p, r, w) })
+	// over what is around it or over the editor's border and corners:
+	// Element.Clip hides only what children draw, and the editor paints on
+	// itself.
+	b := v.border
+	p.Clip(ui.Rect{X: r.X + b, Y: r.Y + b, W: r.W - 2*b, H: r.H - 2*b}, max(v.radius-b, 0), func() { v.paintText(p, r, w) })
 	// The scroll bar while the pointer is over the editor or drags its
 	// thumb, as a scroll container's.
 	if !v.opts.NoScrollbar && (v.inView || v.thumb) {
